@@ -1,0 +1,12 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+# load data set
+diabetes <- read.csv("diabetes.csv", header=T)
+
+head(diabetes)
+summary(diabetes)
+```
