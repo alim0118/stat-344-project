@@ -1,12 +1,36 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
 ```{r}
+
+
 # load data set
 diabetes <- read.csv("diabetes.csv", header=T)
 
-head(diabetes)
-summary(diabetes)
+#Calculating necessary Sample Size
+Population_Size <- nrow(diabetes)
+MOE <- 0.05
+Z <- 1.96
+Proportion <- 0.5
+Sample_Size <- 
+  Proportion*(1-Proportion)/(MOE^2/Z^2+Proportion*(1-Proportion)/Population_Size)
 ```
+Using $n = \frac{p(1-p)}{\frac{\sigma^2}{z^2} + \frac{p(1-p)}{N}}$ results to the necessary
+sample size of `r Sample_Size` rounding to 257. 
+
+```{r}
+#Selecting the samples
+
+#set seed
+set.seed(1738)
+#Random sample selection
+SRS_Sample <- diabetes[sample(nrow(diabetes), Sample_Size), ]
+head(SRS_Sample)
+
+#Stratified sample selection !!!To be decided how to stratify!!!
+```
+
