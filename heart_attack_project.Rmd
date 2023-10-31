@@ -1,0 +1,45 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r}
+# load data set
+heartattack <- read.csv("heart_attack_prediction_dataset.csv", header=T)
+
+head(heartattack)
+```
+
+Find recommended sample size for this study
+
+```{r}
+# calculate min sample size needed
+pop_size <- nrow(heartattack) # 8763
+
+# using 95% CI, find n for worst case scenario: p = 0.5
+MOE <- 0.05
+z <- 1.96
+p_guess <- 0.5
+
+# if N is large enough to ignore FPC
+n_0 = ceiling( ((2*z)^2*(0.5)*(0.5)) / (MOE^2)) # 1537
+
+# since we know N = 8763, using FPC
+n = ceiling( n_0 / (1 + (n_0/pop_size)) ) # 1308
+```
+
+```         
+Selecting Sample
+```
+
+```{r}
+# set seed
+set.seed(2023)
+
+# take SRS of n = 1308
+SRS.index <- sample.int(pop_size, n, replace=F)
+heartsample <- heartattack[SRS.index, ]
+head(heartsample)
+```
