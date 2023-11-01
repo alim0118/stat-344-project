@@ -14,7 +14,7 @@ heartattack <- heartattack[heartattack$Heart.Attack.Risk == 1,]
 head(heartattack)
 ```
 
-Find recommended sample size for this study
+### Find recommended sample size for this study
 
 ```{r}
 # calculate min sample size needed
@@ -31,9 +31,11 @@ n_0 = ceiling( ((2*z)^2*(0.5)*(0.5)) / (MOE^2)) # 1537
 n = ceiling( n_0 / (1 + (n_0/pop_size)) ) # 1032
 ```
 
-Compare study design for stratification
+Assuming the worst case proportions 0.5, the sample size used if we ignored FPC is `r n_0`. Whereas including FPC the sample size used in SRS will be `r n`.
 
-Method 1: stratify by sex
+### Compare study design for stratification
+
+#### Method 1: stratify by sex
 
 ```{r}
 #Calculate within variance of each sex: Male, Female
@@ -42,16 +44,16 @@ colnames(variance_within_strata) <- c("Sex","Within Variance Sex")
 print(variance_within_strata)
 
 #Get stratum sizes
-male_statum_size <- nrow(heartattack[heartattack$Sex == "Male",])
+male_stratum_size <- nrow(heartattack[heartattack$Sex == "Male",])
 female_stratum_size <- nrow(heartattack[heartattack$Sex == "Female",])
 
 
 #Sample size n_h proportional to N_h*S_pw^2/sqrt(cost)
 #Ignore costs
-total <- sum(male_statum_size*variance_within_strata$`Within Variance Sex`[1],
+total <- sum(male_stratum_size*variance_within_strata$`Within Variance Sex`[1],
             female_stratum_size*variance_within_strata$`Within Variance Sex`[2])
 
-male_size_proportion <- male_statum_size*variance_within_strata$`Within Variance Sex`[1]/total
+male_size_proportion <- male_stratum_size*variance_within_strata$`Within Variance Sex`[1]/total
 female_size_proportion <- female_stratum_size*variance_within_strata$`Within Variance Sex`[2]/total
 
 male_sample_size <- round(male_size_proportion*n)
@@ -61,10 +63,12 @@ female_sample_size <- round(female_size_proportion*n)
 var.strata <- c(variance_within_strata$`Within Variance Sex`[1], 
                 variance_within_strata$`Within Variance Sex`[2])
 wt.strata <- c(male_size_proportion, female_size_proportion)
-print(sum(wt.strata*var.strata))
+
+overall.sex.var <- sum(wt.strata*var.strata)
+print(overall.sex.var)
 ```
 
-Method 2: stratify by diet
+#### Method 2: stratify by diet
 
 ```{r}
 #Calculate within variance of each diet stratum: Average, Unhealthy, Healthy
@@ -97,13 +101,123 @@ var.strata <- c(variance_within_strata$`Within Variance BMI`[1],
                 variance_within_strata$`Within Variance BMI`[2],
                 variance_within_strata$`Within Variance BMI`[3])
 wt.strata <- c(average_size_proportion, healthy_size_proportion, unhealthy_size_proportion)
-print(sum(wt.strata*var.strata))
+
+overall.diet.var <- sum(wt.strata*var.strata)
+print(overall.diet.var)
 ```
 
-Assuming the worst case proportions 0.5, the sample size used if we ignored FPC is `r n_0`. Whereas including FPC the sample size used in SRS will be `r n`. In the three stratums: Diet =: (Average,Healthy,Unhealthy), sample size for average is `r average_sample_size`, sample size for Healthy is `r healthy_sample_size`, sample size for Unhealthy is `r unhealthy_sample_size`
+#### Method 3: stratify by whether patient has diabetes 
+
+```{r}
+#Calculate within variance of whether patient has diabetes: 1: Yes, 0: No
+variance_within_strata <- aggregate(BMI ~ Diabetes, heartattack, var)
+colnames(variance_within_strata) <- c("Diabetes","Within Variance Diabetes")
+print(variance_within_strata)
+
+#Get stratum sizes
+diabetes_stratum_size <- nrow(heartattack[heartattack$Diabetes == 1,])
+no_diabetes_stratum_size <- nrow(heartattack[heartattack$Diabetes == 0,])
+
+
+#Sample size n_h proportional to N_h*S_pw^2/sqrt(cost)
+#Ignore costs
+total <- sum(diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[1],
+            no_diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[2])
+
+diabetes_size_proportion <- diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[1]/total
+no_diabetes_size_proportion <- no_diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[2]/total
+
+diabetes_sample_size <- round(diabetes_size_proportion*n)
+no_diabetes_sample_size <- round(no_diabetes_size_proportion*n)
+
+#Overall stratified variance
+var.strata <- c(variance_within_strata$`Within Variance Diabetes`[1], 
+                variance_within_strata$`Within Variance Diabetes`[2])
+wt.strata <- c(diabetes_size_proportion, no_diabetes_size_proportion)
+
+overall.diabetes.var <- sum(wt.strata*var.strata)
+print(overall.diabetes.var)
+```
+
+#### Method 4: stratify by whether patient has family history of heart-related problems
+
+```{r}
+#Calculate within variance of whether patient has family history of heart-related problems: 1: Yes, 0: No
+variance_within_strata <- aggregate(BMI ~ Family.History, heartattack, var)
+colnames(variance_within_strata) <- c("Family History","Within Variance Family History")
+print(variance_within_strata)
+
+#Get stratum sizes
+history_stratum_size <- nrow(heartattack[heartattack$Family.History == 1,])
+no_history_stratum_size <- nrow(heartattack[heartattack$Family.History == 0,])
+
+
+#Sample size n_h proportional to N_h*S_pw^2/sqrt(cost)
+#Ignore costs
+total <- sum(history_stratum_size*variance_within_strata$`Within Variance Family History`[1],
+            no_history_stratum_size*variance_within_strata$`Within Variance Family History`[2])
+
+history_size_proportion <- history_stratum_size*variance_within_strata$`Within Variance Family History`[1]/total
+no_history_size_proportion <- no_history_stratum_size*variance_within_strata$`Within Variance Diabetes`[2]/total
+
+history_sample_size <- round(history_size_proportion*n)
+no_history_sample_size <- round(no_history_size_proportion*n)
+
+#Overall stratified variance
+var.strata <- c(variance_within_strata$`Within Variance Family History`[1], 
+                variance_within_strata$`Within Variance Family History`[2])
+wt.strata <- c(history_size_proportion, no_history_size_proportion)
+
+overall.history.var <- sum(wt.strata*var.strata)
+print(overall.history.var)
+```
+
+#### Method 5: stratify by obesity status
+
+```{r}
+#Calculate within variance of obesity status: 1: Obese, 0: Not obese
+variance_within_strata <- aggregate(BMI ~ Obesity, heartattack, var)
+colnames(variance_within_strata) <- c("Obesity","Within Variance Obesity")
+print(variance_within_strata)
+
+#Get stratum sizes
+obesity_stratum_size <- nrow(heartattack[heartattack$Obesity == 1,])
+not_obese_stratum_size <- nrow(heartattack[heartattack$Obesity == 0,])
+
+
+#Sample size n_h proportional to N_h*S_pw^2/sqrt(cost)
+#Ignore costs
+total <- sum(obesity_stratum_size*variance_within_strata$`Within Variance Obesity`[1],
+            not_obese_stratum_size*variance_within_strata$`Within Variance Obesity`[2])
+
+obesity_size_proportion <- obesity_stratum_size*variance_within_strata$`Within Variance Obesity`[1]/total
+not_obese_size_proportion <- not_obese_stratum_size*variance_within_strata$`Within Variance Obesity`[2]/total
+
+history_sample_size <- round(obesity_size_proportion*n)
+no_history_sample_size <- round(not_obese_size_proportion*n)
+
+#Overall stratified variance
+var.strata <- c(variance_within_strata$`Within Variance Obesity`[1], 
+                variance_within_strata$`Within Variance Obesity`[2])
+wt.strata <- c(obesity_size_proportion, not_obese_size_proportion)
+
+overall.obesity.var <- sum(wt.strata*var.strata)
+print(overall.obesity.var)
+```
+
+```{r}
+overall_var <- data.frame(overall.sex.var, overall.diet.var, overall.diabetes.var, overall.history.var, overall.obesity.var)
+colnames(overall_var) <- c("Overall Sex Var.", "Overall Diet Var.", "Overall Diabetes Var.", "Overall History Var.", "Overall Obesity Var.")
+
+print(overall_var)
+```
+
+By computing and comparing the within variances based on different stratas, stratifying by sex gave the lowest overall within variance of 39.09994. Since the stratification study design performs the best for the largest between-strata variance, implying the lowest within-strata variance, we will stratify by sex.
+
+In the two stratums: Sex =: (Male, Female), sample size for Male is `r male_stratum_size` and sample size for Female is `r female_stratum_size`
 
 ```         
-Selecting Samples through SRS and Stratification from diet
+Selecting Samples through SRS and Stratification by sex
 ```
 
 ```{r}
