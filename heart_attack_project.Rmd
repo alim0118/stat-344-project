@@ -113,7 +113,7 @@ overall.diet.var <- sum(wt.strata*var.strata)
 print(overall.diet.var)
 ```
 
-#### Method 3: stratify by whether patient has diabetes 
+#### Method 3: stratify by whether patient has diabetes
 
 ```{r}
 #Calculate within variance of whether patient has diabetes: 1: Yes, 0: No
@@ -242,7 +242,7 @@ print(overall_var)
 
 By computing and comparing the within variances based on different stratas, stratifying by sex gave the lowest overall within variance of 39.09994. Since the stratification study design performs the best for the largest between-strata variance, implying the lowest within-strata variance, we will stratify by sex.
 
-In the two stratums: Sex =: (Male, Female), sample size for Male is `r male_stratum_size` and sample size for Female is `r female_stratum_size`
+In the two stratums: Sex = (Male, Female), sample size for Male is `r male_sample_size` and sample size for Female is `r female_sample_size`
 
 ```         
 Selecting Samples through SRS and Stratification by sex
@@ -262,14 +262,15 @@ male_stratum <- heartattack[heartattack$Sex == "Male",]
 female_stratum <- heartattack[heartattack$Sex == "Female",]
 
 #Take Stratified samples of males (n = 708) and females (n = 324)
-stratified_male.index <- sample.int(male_stratum_size, replace = F)
+stratified_male.index <- sample.int(male_stratum_size, male_sample_size, replace = F)
 male_sample <- male_stratum[stratified_male.index,]
 head(male_sample)
+nrow(male_sample)
 
-stratified_female.index <- sample.int(female_stratum_size,replace = F)
+stratified_female.index <- sample.int(female_stratum_size, female_sample_size, replace = F)
 female_sample <- female_stratum[stratified_female.index,]
 head(female_sample)
-
+nrow(female_sample)
 ```
 
 Calculating Estimates
@@ -292,7 +293,9 @@ strata_estimator_BMI_mean <- (male_stratum_size/pop_size)*male_BMI_mean +
 data.frame(`Sampling Method` = c("SRS","Stratified Estimate"),
            `BMI Mean` = c(SRS_BMI_mean,strata_estimator_BMI_mean))
 ```
+
 Calculate standard error
+
 ```{r}
 #Calculate SE for SRS and Stratified
 
@@ -318,4 +321,3 @@ stratified_SE <- sqrt(
 data.frame(`Sampling Method` = c("SRS","Stratification"),
            SE = c(SRS_SE,stratified_SE))
 ```
-
