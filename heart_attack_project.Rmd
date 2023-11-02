@@ -252,18 +252,22 @@ Selecting Samples through SRS and Stratification by sex
 # set seed
 set.seed(2023)
 
-# take SRS of n = 1308
+# take SRS of n = 1032
 SRS.index <- sample.int(pop_size, n, replace=F)
 SRS_sample <- heartattack[SRS.index, ]
 head(SRS_sample)
 
+#Stratify male and female stratums to take samples from
+male_stratum <- heartattack[heartattack$Sex == "Male",]
+female_stratum <- heartattack[heartattack$Sex == "Female",]
+
 #Take Stratified samples of males (n = 708) and females (n = 324)
-stratified_male.index <- sample.int(male_sample_size, replace = F)
-male_sample <- heartattack[stratified_male.index,]
+stratified_male.index <- sample.int(male_stratum_size, replace = F)
+male_sample <- male_stratum[stratified_male.index,]
 head(male_sample)
 
-stratified_female.index <- sample.int(female_sample_size,replace = F)
-female_sample <- heartattack[stratified_female.index,]
+stratified_female.index <- sample.int(female_stratum_size,replace = F)
+female_sample <- female_stratum[stratified_female.index,]
 head(female_sample)
 
 ```
@@ -285,14 +289,33 @@ strata_estimator_BMI_mean <- (male_stratum_size/pop_size)*male_BMI_mean +
                                  (female_stratum_size/pop_size)*female_BMI_mean
 
 
-data.frame(Sample = c("SRS","Stratified Estimate"),
+data.frame(`Sampling Method` = c("SRS","Stratified Estimate"),
            `BMI Mean` = c(SRS_BMI_mean,strata_estimator_BMI_mean))
 ```
 Calculate standard error
 ```{r}
-#Calculcate SE for SRS and Stratified
+#Calculate SE for SRS and Stratified
 
+#SRS SE calculation
+SRS_variance <- sum((SRS_sample$BMI - SRS_BMI_mean)^2)/(n-1)
+SRS_FPC <- (1- n/pop_size)
+SRS_SE <- sqrt(SRS_FPC * SRS_variance/n)
 
+#Stratified SE calculation
+male_strata_variance <- sum((male_sample$BMI - male_BMI_mean)^2)/(male_sample_size-1)
+male_strata_FPC <- (1 - male_sample_size/male_stratum_size)
+male_proportion_squared <- (male_stratum_size/pop_size)^2
 
+female_strata_variance <- 
+  sum((female_sample$BMI - female_BMI_mean)^2)/(female_sample_size-1)
+female_strata_FPC <- (1 - female_sample_size/female_stratum_size)
+female_proportion_squared <- (female_stratum_size/pop_size)^2
+
+stratified_SE <- sqrt(
+  (male_proportion_squared*male_strata_FPC*male_strata_variance/male_sample_size)+
+(female_proportion_squared*female_strata_FPC*female_strata_variance/female_sample_size))
+
+data.frame(`Sampling Method` = c("SRS","Stratification"),
+           SE = c(SRS_SE,stratified_SE))
 ```
 
