@@ -53,8 +53,11 @@ female_stratum_size <- nrow(heartattack[heartattack$Sex == "Female",])
 total <- sum(male_stratum_size*variance_within_strata$`Within Variance Sex`[1],
             female_stratum_size*variance_within_strata$`Within Variance Sex`[2])
 
-male_size_proportion <- male_stratum_size*variance_within_strata$`Within Variance Sex`[1]/total
-female_size_proportion <- female_stratum_size*variance_within_strata$`Within Variance Sex`[2]/total
+male_size_proportion <- 
+  male_stratum_size*variance_within_strata$`Within Variance Sex`[1]/total
+
+female_size_proportion <- 
+  female_stratum_size*variance_within_strata$`Within Variance Sex`[2]/total
 
 male_sample_size <- round(male_size_proportion*n)
 female_sample_size <- round(female_size_proportion*n)
@@ -88,9 +91,12 @@ total <- sum(average_stratum_size*variance_within_strata$`Within Variance BMI`[1
             healthy_stratum_size*variance_within_strata$`Within Variance BMI`[2],
             unhealthy_stratum_size*variance_within_strata$`Within Variance BMI`[3])
 
-average_size_proportion <- average_stratum_size*variance_within_strata$`Within Variance BMI`[1]/total
-healthy_size_proportion <- healthy_stratum_size*variance_within_strata$`Within Variance BMI`[2]/total
-unhealthy_size_proportion <- unhealthy_stratum_size*variance_within_strata$`Within Variance BMI`[3]/total
+average_size_proportion <- 
+  average_stratum_size*variance_within_strata$`Within Variance BMI`[1]/total
+healthy_size_proportion <- 
+  healthy_stratum_size*variance_within_strata$`Within Variance BMI`[2]/total
+unhealthy_size_proportion <- 
+  unhealthy_stratum_size*variance_within_strata$`Within Variance BMI`[3]/total
 
 average_sample_size <- round(average_size_proportion*n)
 healthy_sample_size <- round(healthy_size_proportion*n)
@@ -100,7 +106,8 @@ unhealthy_sample_size <- round(unhealthy_size_proportion*n)
 var.strata <- c(variance_within_strata$`Within Variance BMI`[1], 
                 variance_within_strata$`Within Variance BMI`[2],
                 variance_within_strata$`Within Variance BMI`[3])
-wt.strata <- c(average_size_proportion, healthy_size_proportion, unhealthy_size_proportion)
+wt.strata <- 
+  c(average_size_proportion, healthy_size_proportion, unhealthy_size_proportion)
 
 overall.diet.var <- sum(wt.strata*var.strata)
 print(overall.diet.var)
@@ -121,11 +128,14 @@ no_diabetes_stratum_size <- nrow(heartattack[heartattack$Diabetes == 0,])
 
 #Sample size n_h proportional to N_h*S_pw^2/sqrt(cost)
 #Ignore costs
-total <- sum(diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[1],
-            no_diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[2])
+total <- 
+  sum(diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[1],
+      no_diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[2])
 
-diabetes_size_proportion <- diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[1]/total
-no_diabetes_size_proportion <- no_diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[2]/total
+diabetes_size_proportion <-
+  diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[1]/total
+no_diabetes_size_proportion <- 
+  no_diabetes_stratum_size*variance_within_strata$`Within Variance Diabetes`[2]/total
 
 diabetes_sample_size <- round(diabetes_size_proportion*n)
 no_diabetes_sample_size <- round(no_diabetes_size_proportion*n)
@@ -142,7 +152,9 @@ print(overall.diabetes.var)
 #### Method 4: stratify by whether patient has family history of heart-related problems
 
 ```{r}
-#Calculate within variance of whether patient has family history of heart-related problems: 1: Yes, 0: No
+#Calculate within variance of whether patient has 
+#family history of heart-related problems:#1: Yes, 0: No
+
 variance_within_strata <- aggregate(BMI ~ Family.History, heartattack, var)
 colnames(variance_within_strata) <- c("Family History","Within Variance Family History")
 print(variance_within_strata)
@@ -154,11 +166,14 @@ no_history_stratum_size <- nrow(heartattack[heartattack$Family.History == 0,])
 
 #Sample size n_h proportional to N_h*S_pw^2/sqrt(cost)
 #Ignore costs
-total <- sum(history_stratum_size*variance_within_strata$`Within Variance Family History`[1],
-            no_history_stratum_size*variance_within_strata$`Within Variance Family History`[2])
+total <- 
+  sum(history_stratum_size*variance_within_strata$`Within Variance Family History`[1],
+   no_history_stratum_size*variance_within_strata$`Within Variance Family History`[2])
 
-history_size_proportion <- history_stratum_size*variance_within_strata$`Within Variance Family History`[1]/total
-no_history_size_proportion <- no_history_stratum_size*variance_within_strata$`Within Variance Diabetes`[2]/total
+history_size_proportion <- 
+  history_stratum_size*variance_within_strata$`Within Variance Family History`[1]/total
+no_history_size_proportion <- 
+  no_history_stratum_size*variance_within_strata$`Within Variance Diabetes`[2]/total
 
 history_sample_size <- round(history_size_proportion*n)
 no_history_sample_size <- round(no_history_size_proportion*n)
@@ -190,8 +205,10 @@ not_obese_stratum_size <- nrow(heartattack[heartattack$Obesity == 0,])
 total <- sum(obesity_stratum_size*variance_within_strata$`Within Variance Obesity`[1],
             not_obese_stratum_size*variance_within_strata$`Within Variance Obesity`[2])
 
-obesity_size_proportion <- obesity_stratum_size*variance_within_strata$`Within Variance Obesity`[1]/total
-not_obese_size_proportion <- not_obese_stratum_size*variance_within_strata$`Within Variance Obesity`[2]/total
+obesity_size_proportion <- 
+  obesity_stratum_size*variance_within_strata$`Within Variance Obesity`[1]/total
+not_obese_size_proportion <- 
+  not_obese_stratum_size*variance_within_strata$`Within Variance Obesity`[2]/total
 
 history_sample_size <- round(obesity_size_proportion*n)
 no_history_sample_size <- round(not_obese_size_proportion*n)
@@ -206,8 +223,19 @@ print(overall.obesity.var)
 ```
 
 ```{r}
-overall_var <- data.frame(overall.sex.var, overall.diet.var, overall.diabetes.var, overall.history.var, overall.obesity.var)
-colnames(overall_var) <- c("Overall Sex Var.", "Overall Diet Var.", "Overall Diabetes Var.", "Overall History Var.", "Overall Obesity Var.")
+overall_var <- 
+  data.frame(overall.sex.var, 
+             overall.diet.var,
+             overall.diabetes.var, 
+             overall.history.var, 
+             overall.obesity.var)
+
+colnames(overall_var) <-
+  c("Overall Sex Var.", 
+    "Overall Diet Var.", 
+    "Overall Diabetes Var.", 
+    "Overall History Var.", 
+    "Overall Obesity Var.")
 
 print(overall_var)
 ```
@@ -226,17 +254,45 @@ set.seed(2023)
 
 # take SRS of n = 1308
 SRS.index <- sample.int(pop_size, n, replace=F)
-heartsample <- heartattack[SRS.index, ]
-head(heartsample)
+SRS_sample <- heartattack[SRS.index, ]
+head(SRS_sample)
 
+#Take Stratified samples of males (n = 708) and females (n = 324)
+stratified_male.index <- sample.int(male_sample_size, replace = F)
+male_sample <- heartattack[stratified_male.index,]
+head(male_sample)
+
+stratified_female.index <- sample.int(female_sample_size,replace = F)
+female_sample <- heartattack[stratified_female.index,]
+head(female_sample)
 
 ```
-
-The
 
 Calculating Estimates
 
 ```{r}
 #Calculate mean BMI from SRS
 
+SRS_BMI_mean <- mean(SRS_sample$BMI)
+
+#Calculate mean BMI from male sample and female sample
+
+male_BMI_mean <- mean(male_sample$BMI)
+female_BMI_mean <- mean(female_sample$BMI)
+#Calculate stratified estimator for BMI mean (sum of weighted BMI means)
+
+strata_estimator_BMI_mean <- (male_stratum_size/pop_size)*male_BMI_mean +
+                                 (female_stratum_size/pop_size)*female_BMI_mean
+
+
+data.frame(Sample = c("SRS","Stratified Estimate"),
+           `BMI Mean` = c(SRS_BMI_mean,strata_estimator_BMI_mean))
 ```
+Calculate standard error
+```{r}
+#Calculcate SE for SRS and Stratified
+
+
+
+```
+
