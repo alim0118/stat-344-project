@@ -250,7 +250,7 @@ Selecting Samples through SRS and Stratification by sex
 
 ```{r}
 # set seed
-set.seed(2023)
+set.seed(1)
 
 # take SRS of n = 1032
 SRS.index <- sample.int(pop_size, n, replace=F)
@@ -273,7 +273,7 @@ head(female_sample)
 nrow(female_sample)
 ```
 
-Calculating Estimates
+Calculating Continuous Estimates
 
 ```{r}
 #Calculate mean BMI from SRS
@@ -294,7 +294,7 @@ data.frame(`Sampling Method` = c("SRS","Stratified Estimate"),
            `BMI Mean` = c(SRS_BMI_mean,strata_estimator_BMI_mean))
 ```
 
-Calculate standard error
+Calculate Continuous standard error
 
 ```{r}
 #Calculate SE for SRS and Stratified
@@ -319,5 +319,75 @@ stratified_SE <- sqrt(
 (female_proportion_squared*female_strata_FPC*female_strata_variance/female_sample_size))
 
 data.frame(`Sampling Method` = c("SRS","Stratification"),
-           SE = c(SRS_SE,stratified_SE))
+           `Continuous SE` = c(SRS_SE,stratified_SE))
 ```
+
+Calculating Proportion Estimate
+
+```{r}
+#We use the previous samples
+
+#SRS
+#Find number of observations where BMI > 30 from SRS sample
+num_obs_BMI_over_30 <- nrow(SRS_sample[SRS_sample$BMI > 30,])
+
+#Find estimated proportion of BMI over 30 by dividing observed BMI > 30 by sample size
+SRS_proportion_obs_BMI_over_30 <- num_obs_BMI_over_30/n
+
+#STRATIFIED
+#male estimated proportion of BMI over 30
+male_num_obs_BMI_over_30 <- nrow(male_sample[male_sample$BMI > 30,])
+male_proportion_BMI_over_30 <- male_num_obs_BMI_over_30/male_sample_size
+
+#female estimated proportion of BMI over 30
+female_num_obs_BMI_over_30 <- nrow(female_sample[female_sample$BMI > 30,])
+female_proportion_BMI_over_30 <- female_num_obs_BMI_over_30/female_sample_size
+
+#Sum weighted stratified proportions to get overall stratified proportion estimate
+stratified_overall_proportion <- 
+  (male_stratum_size/pop_size)*male_proportion_BMI_over_30 + 
+  (female_stratum_size/pop_size)*female_proportion_BMI_over_30
+
+data.frame(`Sampling Method` = c("SRS","Stratification"),
+           `Proportion of BMI Greater Than 30 Estimate` = 
+             c(SRS_proportion_obs_BMI_over_30,stratified_overall_proportion))
+```
+Calculate Proportion SE
+```{r}
+#SRS
+
+#variance = sqrt[p(1-p)/n]
+SRS_proportion_SE <- 
+  sqrt(SRS_proportion_obs_BMI_over_30*(1-SRS_proportion_obs_BMI_over_30)/n)
+
+
+# square root(sum(StratumProportion^2 * stratumFPC * variance/stratum_sample_size))
+
+#Male proportions Variance
+male_proportion_BMI_over_30_variance <- 
+  male_proportion_BMI_over_30 * (1 - male_proportion_BMI_over_30)
+#Female proportions Variance
+female_proportion_BMI_over_30_variance <-
+  female_proportion_BMI_over_30 * (1 - female_proportion_BMI_over_30)
+
+#   FPC used is same as the one used from calculated continuous SE:
+#   male_strata_FPC, female_strata_FPC
+
+#   Male and Female stratum proportions squared 
+#   is same as one used to calculate continuous SE:
+#   male_proportion_squared, female_proportion_squared
+
+stratified_proportion_SE <-
+  sqrt( (male_proportion_squared * male_strata_FPC * 
+  male_proportion_BMI_over_30_variance/male_sample_size) +
+    
+  (female_proportion_squared * female_strata_FPC * 
+  female_proportion_BMI_over_30_variance/female_sample_size) )
+
+data.frame(`Sampling Method` = c("SRS","Stratification"),
+           `Proportion of BMI greater than 30 SE` =
+             c(SRS_proportion_SE,stratified_proportion_SE))
+
+```
+
+
