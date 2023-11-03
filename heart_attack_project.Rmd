@@ -244,9 +244,7 @@ By computing and comparing the within variances based on different stratas, stra
 
 In the two stratums: Sex = (Male, Female), sample size for Male is `r male_sample_size` and sample size for Female is `r female_sample_size`
 
-```         
-Selecting Samples through SRS and Stratification by sex
-```
+### Selecting Samples through SRS and Stratification by sex
 
 ```{r}
 # set seed
@@ -265,15 +263,15 @@ female_stratum <- heartattack[heartattack$Sex == "Female",]
 stratified_male.index <- sample.int(male_stratum_size, male_sample_size, replace = F)
 male_sample <- male_stratum[stratified_male.index,]
 head(male_sample)
-nrow(male_sample)
 
 stratified_female.index <- sample.int(female_stratum_size, female_sample_size, replace = F)
 female_sample <- female_stratum[stratified_female.index,]
 head(female_sample)
-nrow(female_sample)
 ```
 
-Calculating Continuous Estimates
+### Continuous Population
+
+#### Estimate Mean
 
 ```{r}
 #Calculate mean BMI from SRS
@@ -294,7 +292,7 @@ data.frame(`Sampling Method` = c("SRS","Stratified Estimate"),
            `BMI Mean` = c(SRS_BMI_mean,strata_estimator_BMI_mean))
 ```
 
-Calculate Continuous standard error
+#### Calculate Standard Error
 
 ```{r}
 #Calculate SE for SRS and Stratified
@@ -322,7 +320,28 @@ data.frame(`Sampling Method` = c("SRS","Stratification"),
            `Continuous SE` = c(SRS_SE,stratified_SE))
 ```
 
-Calculating Proportion Estimate
+#### Construct 95% Confidence Interval
+
+```{r}
+# Construct 95% CI for mean BMI for SRS
+SRS_cont_moe <- 1.96*SRS_SE 
+SRS_cont_ci <- c(SRS_BMI_mean - SRS_cont_moe, 
+                 SRS_BMI_mean + SRS_cont_moe)
+
+
+# Construct 95% CI for mean BMI for Stratified
+stratified_cont_moe <- 1.96*stratified_SE 
+stratified_cont_ci <- c(strata_estimator_BMI_mean - stratified_cont_moe,
+                        strata_estimator_BMI_mean + stratified_cont_moe)
+
+data.frame(`Sampling Method` = c("SRS","Stratification"),
+           `CI Lower Bound` = c(SRS_cont_ci[1], stratified_cont_ci[1]),
+           `CI Upper Bound` = c(SRS_cont_ci[2], stratified_cont_ci[2]))
+```
+
+### Binary Population
+
+#### Estimate Proportion
 
 ```{r}
 #We use the previous samples
@@ -352,7 +371,9 @@ data.frame(`Sampling Method` = c("SRS","Stratification"),
            `Proportion of BMI Greater Than 30 Estimate` = 
              c(SRS_proportion_obs_BMI_over_30,stratified_overall_proportion))
 ```
-Calculate Proportion SE
+
+#### Calculate Standard Error
+
 ```{r}
 #SRS
 
@@ -390,4 +411,21 @@ data.frame(`Sampling Method` = c("SRS","Stratification"),
 
 ```
 
+#### Construct 95% confidence interval
 
+```{r}
+# Construct 95% CI for proportion of observations with BMI > 30 for SRS
+SRS_binary_moe <- 1.96*SRS_proportion_SE 
+SRS_binary_ci <- c(SRS_proportion_obs_BMI_over_30 - SRS_binary_moe,
+                   SRS_proportion_obs_BMI_over_30 + SRS_binary_moe)
+
+
+# Construct 95% CI for proportion of observations with BMI > 30 for Stratified
+stratified_binary_moe <- 1.96*stratified_proportion_SE 
+stratified_binary_ci <- c(stratified_overall_proportion - stratified_binary_moe,
+                          stratified_overall_proportion + stratified_binary_moe)
+
+data.frame(`Sampling Method` = c("SRS","Stratification"),
+           `CI Lower Bound` = c(SRS_binary_ci[1], stratified_binary_ci[1]),
+           `CI Upper Bound` = c(SRS_binary_ci[2], stratified_binary_ci[2]))
+```
