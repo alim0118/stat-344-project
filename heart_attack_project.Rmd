@@ -26,9 +26,9 @@ z <- 1.96
 p_guess <- 0.5
 
 # if N is large enough to ignore FPC
-n_0 = ceiling( ((2*z)^2*(0.5)*(0.5)) / (MOE^2)) # 1537
-# since we know N = 8763, using FPC
-n = ceiling( n_0 / (1 + (n_0/pop_size)) ) # 1032
+n_0 = ceiling( (z^2*(0.5)*(0.5)) / (MOE^2)) # 385
+# since we know N = 3139, using FPC
+n = ceiling( n_0 / (1 + (n_0/pop_size)) ) # 343
 ```
 
 Assuming the worst case proportions 0.5, the sample size used if we ignored FPC is `r n_0`. Whereas including FPC the sample size used in SRS will be `r n`.
@@ -50,6 +50,8 @@ female_stratum_size <- nrow(heartattack[heartattack$Sex == "Female",])
 
 #Sample size n_h proportional to N_h*S_pw^2/sqrt(cost)
 #Ignore costs
+
+#total is used to normalize N_h*S_pw^2/sqrt(cost) to equal 1
 total <- sum(male_stratum_size*variance_within_strata$`Within Variance Sex`[1],
             female_stratum_size*variance_within_strata$`Within Variance Sex`[2])
 
@@ -59,6 +61,7 @@ male_size_proportion <-
 female_size_proportion <- 
   female_stratum_size*variance_within_strata$`Within Variance Sex`[2]/total
 
+#total sample size * strata proportion = strata sample size
 male_sample_size <- round(male_size_proportion*n)
 female_sample_size <- round(female_size_proportion*n)
 
@@ -68,7 +71,7 @@ var.strata <- c(variance_within_strata$`Within Variance Sex`[1],
 wt.strata <- c(male_size_proportion, female_size_proportion)
 
 overall.sex.var <- sum(wt.strata*var.strata)
-print(overall.sex.var)
+data.frame(`Overall Sex Variation` = c(overall.sex.var))
 ```
 
 #### Method 2: stratify by diet
@@ -87,6 +90,7 @@ unhealthy_stratum_size <- nrow(heartattack[heartattack$Diet == "Unhealthy",])
 
 #Sample size n_h proportional to N_h*S_pw^2/sqrt(cost)
 #Ignore costs
+#total is used to normalize N_h*S_pw^2/sqrt(cost) to equal 1
 total <- sum(average_stratum_size*variance_within_strata$`Within Variance BMI`[1],
             healthy_stratum_size*variance_within_strata$`Within Variance BMI`[2],
             unhealthy_stratum_size*variance_within_strata$`Within Variance BMI`[3])
@@ -98,6 +102,8 @@ healthy_size_proportion <-
 unhealthy_size_proportion <- 
   unhealthy_stratum_size*variance_within_strata$`Within Variance BMI`[3]/total
 
+#multiply total sample sixe with proportions to get the sample size for each
+#strata
 average_sample_size <- round(average_size_proportion*n)
 healthy_sample_size <- round(healthy_size_proportion*n)
 unhealthy_sample_size <- round(unhealthy_size_proportion*n)
@@ -303,6 +309,9 @@ SRS_FPC <- (1- n/pop_size)
 SRS_SE <- sqrt(SRS_FPC * SRS_variance/n)
 
 #Stratified SE calculation
+
+#First calculate male and female strata variances
+#and the strata FPC and proportions relative to population size squared
 male_strata_variance <- sum((male_sample$BMI - male_BMI_mean)^2)/(male_sample_size-1)
 male_strata_FPC <- (1 - male_sample_size/male_stratum_size)
 male_proportion_squared <- (male_stratum_size/pop_size)^2
@@ -312,6 +321,7 @@ female_strata_variance <-
 female_strata_FPC <- (1 - female_sample_size/female_stratum_size)
 female_proportion_squared <- (female_stratum_size/pop_size)^2
 
+# SE = sqrt(sum ((N_h/N)^2 * Strata_H_FPC * Strata Variance / strata sample size))
 stratified_SE <- sqrt(
   (male_proportion_squared*male_strata_FPC*male_strata_variance/male_sample_size)+
 (female_proportion_squared*female_strata_FPC*female_strata_variance/female_sample_size))
