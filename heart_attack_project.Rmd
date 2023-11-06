@@ -254,7 +254,7 @@ In the two stratums: Sex = (Male, Female), sample size for Male is `r male_sampl
 
 ```{r}
 # set seed
-set.seed(1)
+set.seed(2)
 
 # take SRS of n = 1032
 SRS.index <- sample.int(pop_size, n, replace=F)
