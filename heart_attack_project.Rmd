@@ -11,6 +11,12 @@ heartattack <- read.csv("heart_attack_prediction_dataset.csv", header=T)
 
 # Our population of interest are people at risk of heart attack 
 heartattack <- heartattack[heartattack$Heart.Attack.Risk == 1,]
+
+#Remove unnecessary columns
+#We keep Sex,diet,diabetes,family history heart problems,obesity, BMI
+heartattack <- 
+  heartattack[,(colnames(heartattack)
+                %in% c("Sex","Diabetes","Family.History","Obesity","Diet","BMI"))]
 head(heartattack)
 ```
 
