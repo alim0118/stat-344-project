@@ -35,9 +35,12 @@ p_guess <- 0.5
 n_0 = ceiling( (z^2*(0.5)*(0.5)) / (MOE^2)) # 385
 # since we know N = 3139, using FPC
 n = ceiling( n_0 / (1 + (n_0/pop_size)) ) # 343
+
+# to use CLT for our binary population, must check 1. np >= 10 and n(1-p) >= 10
+(n*p_guess >= 10) & (n*(1-p_guess) >= 10)
 ```
 
-Assuming the worst case proportions 0.5, the sample size used if we ignored FPC is `r n_0`. Whereas including FPC the sample size used in SRS will be `r n`.
+Assuming the worst case proportions 0.5, the sample size used if we ignored FPC is `r n_0`. Whereas including FPC the sample size used in SRS will be `r n`. Since we assume CLT when constructing our confidence interval in our binary population, the conditions $np \geq 10$ and $n(1-p) \geq 10$ must be satisfied. By using the worst case proportions, both conditions are met.
 
 ### Compare study design for stratification
 
@@ -262,7 +265,7 @@ In the two stratums: Sex = (Male, Female), sample size for Male is `r male_sampl
 # set seed
 set.seed(2)
 
-# take SRS of n = 1032
+# take SRS of n = 343
 SRS.index <- sample.int(pop_size, n, replace=F)
 SRS_sample <- heartattack[SRS.index, ]
 head(SRS_sample)
